@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.korstudio.cast"
+    namespace = "com.korstudio.play"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.korstudio.cast"
-        minSdk = 24
+        applicationId = "com.korstudio.play"
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

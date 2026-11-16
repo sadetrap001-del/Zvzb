@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "KorCast"
+rootProject.name = "KorPlay"
 include(":app")
