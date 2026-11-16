@@ -6,7 +6,10 @@ import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.ComponentName
 import android.content.IntentFilter
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
@@ -36,8 +39,13 @@ class HomeActivity : Activity() {
     )
 
     private lateinit var grid: GridView
-    private lateinit var empty: TextView
+    private lateinit var backdrop: ImageView
+    private lateinit var title: TextView
+    private lateinit var subtitle: TextView
     private lateinit var hiddenButton: Button
+    private lateinit var keeperButton: Button
+    private val backdrops = HashMap<String, Bitmap>()
+    private var backdropPackage: String? = null
 
     private val prefs by lazy { getSharedPreferences("home", Context.MODE_PRIVATE) }
     private var favorites: Set<String> = emptySet()
@@ -64,9 +72,9 @@ class HomeActivity : Activity() {
             image.setImageDrawable(app.image)
             // Afişler kutuyu doldurur; kare simgeler ortalanıp küçük gösterilir.
             image.scaleType = if (app.isBanner) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_CENTER
-            val pad = if (app.isBanner) 0 else (14 * resources.displayMetrics.density).toInt()
+            val pad = if (app.isBanner) 0 else (12 * resources.displayMetrics.density).toInt()
             image.setPadding(pad, pad, pad, pad)
-            view.findViewById<TextView>(R.id.label).text = app.label
+            image.clipToOutline = true
             view.findViewById<View>(R.id.star).visibility =
                 if (app.packageName in favorites) View.VISIBLE else View.GONE
             view.alpha = if (app.packageName in hidden) 0.45f else 1f
@@ -80,8 +88,11 @@ class HomeActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         grid = findViewById(R.id.grid)
-        empty = findViewById(R.id.empty)
+        backdrop = findViewById(R.id.backdrop)
+        title = findViewById(R.id.title)
+        subtitle = findViewById(R.id.subtitle)
         hiddenButton = findViewById(R.id.hidden)
+        keeperButton = findViewById(R.id.keeper)
 
         favorites = prefs.getStringSet(KEY_FAVORITES, emptySet())!!.toSet()
         hidden = prefs.getStringSet(KEY_HIDDEN, emptySet())!!.toSet()
@@ -93,13 +104,17 @@ class HomeActivity : Activity() {
             true
         }
         grid.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) = raise(view)
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                raise(view)
+                shown.getOrNull(position)?.let { showHero(it) }
+            }
             override fun onNothingSelected(parent: AdapterView<*>) = raise(null)
         }
         grid.setOnFocusChangeListener { _, focused -> raise(if (focused) grid.selectedView else null) }
 
         findViewById<Button>(R.id.freeMemory).setOnClickListener { freeMemory() }
         findViewById<Button>(R.id.settings).setOnClickListener { openSettings() }
+        keeperButton.setOnClickListener { showKeeperDialog() }
         hiddenButton.setOnClickListener {
             showHidden = !showHidden
             render()
@@ -117,6 +132,11 @@ class HomeActivity : Activity() {
             registerReceiver(packageReceiver, filter)
         }
         loadApps()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        keeperButton.setText(if (isKeeperEnabled()) R.string.keeper_on else R.string.keeper_off)
     }
 
     override fun onDestroy() {
@@ -204,8 +224,10 @@ class HomeActivity : Activity() {
         raise(null)
         adapter.notifyDataSetChanged()
 
-        empty.setText(R.string.empty)
-        empty.visibility = if (shown.isEmpty()) View.VISIBLE else View.GONE
+        if (shown.isEmpty()) {
+            title.text = ""
+            subtitle.setText(R.string.empty)
+        }
 
         if (hidden.isEmpty()) {
             showHidden = false
@@ -221,6 +243,60 @@ class HomeActivity : Activity() {
         val index = shown.indexOfFirst { it.packageName == selectedPackage }
         if (index >= 0) grid.setSelection(index)
         if (currentFocus == null || currentFocus === grid) grid.requestFocus()
+        shown.getOrNull(if (index >= 0) index else 0)?.let { showHero(it) }
+    }
+
+    /* ---------- Büyük başlık ve arka plan ---------- */
+
+    /** Seçili uygulamanın adını büyük yazar, afişinden bulanık bir arka plan üretir. */
+    private fun showHero(app: TvApp) {
+        title.text = app.label
+        subtitle.setText(if (app.packageName in favorites) R.string.hint_favorite else R.string.hint)
+        if (backdropPackage == app.packageName) return
+        backdropPackage = app.packageName
+        val bitmap = backdrops.getOrPut(app.packageName) { blurred(app.image) }
+        backdrop.animate().cancel()
+        backdrop.alpha = 0.35f
+        backdrop.setImageBitmap(bitmap)
+        backdrop.animate().alpha(1f).setDuration(220).start()
+    }
+
+    /** Görseli çok küçük bir bitmap'e çizer; ekrana büyütülünce yumuşak, renkli bir zemin olur. */
+    private fun blurred(image: Drawable?): Bitmap {
+        val bitmap = Bitmap.createBitmap(32, 18, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(0xFF15171D.toInt())
+        // Çizilebilir paylaşılıyor olabilir; sınırlarını bozmamak için kopyası kullanılır.
+        val copy = image?.constantState?.newDrawable(resources)?.mutate()
+        if (copy != null) {
+            copy.setBounds(0, 0, bitmap.width, bitmap.height)
+            copy.draw(canvas)
+        }
+        return bitmap
+    }
+
+    /* ---------- Kalıcılık ---------- */
+
+    private fun isKeeperEnabled(): Boolean {
+        val enabled = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: return false
+        val mine = ComponentName(this, HomeKeeperService::class.java)
+        return enabled.split(':').any { ComponentName.unflattenFromString(it) == mine }
+    }
+
+    private fun showKeeperDialog() {
+        val enabled = isKeeperEnabled()
+        AlertDialog.Builder(this)
+            .setTitle(R.string.keeper_title)
+            .setMessage(if (enabled) R.string.keeper_enabled_message else R.string.keeper_message)
+            .setPositiveButton(R.string.keeper_open) { _, _ ->
+                try {
+                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                } catch (e: Exception) {
+                    openSettings()
+                }
+            }
+            .setNegativeButton(R.string.keeper_cancel, null)
+            .show()
     }
 
     private fun savePrefs() {

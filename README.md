@@ -30,5 +30,6 @@ uygulamanın internet izni yoktur, bu yüzden reklam gösteremez ve veri gönder
 
 - OK: uygulamayı aç. OK'a basılı tut (ya da menü tuşu): favorilere ekle, listeden gizle, uygulama bilgisi.
 - "Belleği boşalt": arka planda bekleyen uygulamaları kapatır.
-- Ana ekran yapmak için TV'de Home tuşuna basınca çıkan seçimde Kor Home'u seç; bazı TV'ler
-  (özellikle Google TV) bu seçimi sunmaz, o durumda Kor Home uygulamalar listesinden açılır.
+- Düzen: arkada seçili uygulamanın afişinden üretilen tam ekran zemin, altta geniş kutulardan oluşan sıra.
+- "Kalıcı yap": Erişilebilirlik ayarlarında Kor Home açılırsa, TV açıldığında ve Home tuşuna basıldığında
+  eski ana ekran yerine Kor Home gelir. Servis yalnızca öne gelen ekranın adına bakar, içeriği okumaz.

@@ -8,6 +8,16 @@
     <string name="loading">Uygulamalar yükleniyor…</string>
     <string name="empty">Gösterilecek uygulama yok.</string>
     <string name="hint">OK: aç  ·  OK\'a basılı tut: favori, gizle, uygulama bilgisi</string>
+    <string name="hint_favorite">★ Favori  ·  OK: aç  ·  OK\'a basılı tut: seçenekler</string>
+    <string name="keeper_on">Kalıcı: açık</string>
+    <string name="keeper_off">Kalıcı yap</string>
+    <string name="keeper_title">Kor Home kalıcı olsun</string>
+    <string name="keeper_message">TV açıldığında ve Home tuşuna basıldığında eski ana ekran yerine Kor Home gelsin istiyorsan, açılacak Erişilebilirlik ayarlarında “Kor Home”u bulup aç.\n\nBu izin yalnızca hangi ekranın öne geldiğini görmek için kullanılır; ekrandaki içerik okunmaz. İstediğin zaman aynı yerden kapatabilirsin.</string>
+    <string name="keeper_open">Ayarları aç</string>
+    <string name="keeper_cancel">Vazgeç</string>
+    <string name="keeper_enabled_message">Kor Home kalıcı. Eski ana ekrana dönmek istersen Erişilebilirlik ayarlarından “Kor Home”u kapat.</string>
+    <string name="keeper_service_label">Kor Home</string>
+    <string name="keeper_service_description">TV açıldığında ya da Home tuşuna basıldığında eski ana ekran yerine Kor Home\'u öne getirir. Yalnızca öne gelen ekranın adını görür; ekran içeriğini okumaz.</string>
     <string name="menu_favorite">Favorilere ekle</string>
     <string name="menu_unfavorite">Favorilerden çıkar</string>
     <string name="menu_hide">Listeden gizle</string>
