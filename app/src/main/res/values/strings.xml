@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kor Cast</string>
+
+    <string name="sender_title">Telefonu TV\'ye yansıt</string>
+    <string name="sender_sub">Telefon ve TV aynı Wi-Fi ağında olmalı. TV\'de de Kor Cast açık olsun.</string>
+    <string name="label_tv">TV</string>
+    <string name="searching">Ağda TV aranıyor…</string>
+    <string name="manual_ip_hint">TV\'nin IP adresi (ör. 192.168.1.50)</string>
+    <string name="label_quality">Görüntü kalitesi</string>
+    <string name="label_bitrate">Bit hızı</string>
+    <string name="label_fps">Kare hızı</string>
+    <string name="label_audio">Oyun sesini TV\'ye gönder</string>
+    <string name="audio_unsupported">Ses aktarımı Android 10 ve üzeri gerektirir.</string>
+    <string name="start">Yayını başlat</string>
+    <string name="stop">Yayını durdur</string>
+    <string name="switch_to_receiver">Bu cihazı alıcı (TV) olarak kullan</string>
+    <string name="status_idle">Hazır</string>
+    <string name="status_connecting">TV\'ye bağlanılıyor…</string>
+    <string name="status_streaming">Yayında · %1$s</string>
+    <string name="status_error">Hata: %1$s</string>
+    <string name="status_ended">Yayın sona erdi</string>
+    <string name="err_no_target">Önce bir TV seç ya da IP adresini yaz.</string>
+    <string name="err_permission">Ekran paylaşımına izin verilmedi.</string>
+    <string name="tip">İpucu: Yayın sırasında telefonun medya sesini kıs; ses TV\'den gelir. En düşük gecikme için 5 GHz Wi-Fi kullan.</string>
+
+    <string name="quality_4k">4K (2160p) · büyütülmüş</string>
+    <string name="quality_native">Telefonun kendi çözünürlüğü</string>
+    <string name="quality_1440">1440p</string>
+    <string name="quality_1080">1080p</string>
+    <string name="quality_720">720p</string>
+
+    <string name="rx_waiting">Telefon bekleniyor</string>
+    <string name="rx_hint">Telefonda Kor Cast\'i aç, bu TV\'yi seç ve yayını başlat.</string>
+    <string name="rx_address">Bu TV\'nin adresi: %1$s</string>
+    <string name="rx_no_network">Ağ bağlantısı yok</string>
+    <string name="rx_connected">Bağlandı, görüntü bekleniyor…</string>
+    <string name="rx_decoder_error">Bu cihaz gelen görüntüyü çözemedi. Telefonda daha düşük bir kalite seç.</string>
+
+    <string name="notif_channel">Ekran yayını</string>
+    <string name="notif_title">Kor Cast yayında</string>
+    <string name="notif_text">Telefonun ekranı TV\'ye gönderiliyor</string>
+</resources>
