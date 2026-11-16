@@ -22,3 +22,13 @@ Oyun TV ekranında açıldığı için, telefonun ekranı yansıtılmak yerine T
 ```
 ./gradlew assembleDebug
 ```
+
+# Kor Home
+
+Android TV için reklamsız, hafif ana ekran (`tv` modülü). Yalnızca saat ve kurulu uygulamalar görünür;
+uygulamanın internet izni yoktur, bu yüzden reklam gösteremez ve veri gönderemez.
+
+- OK: uygulamayı aç. OK'a basılı tut (ya da menü tuşu): favorilere ekle, listeden gizle, uygulama bilgisi.
+- "Belleği boşalt": arka planda bekleyen uygulamaları kapatır.
+- Ana ekran yapmak için TV'de Home tuşuna basınca çıkan seçimde Kor Home'u seç; bazı TV'ler
+  (özellikle Google TV) bu seçimi sunmaz, o durumda Kor Home uygulamalar listesinden açılır.

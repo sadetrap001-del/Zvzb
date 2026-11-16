@@ -20,5 +20,7 @@ jobs:
         run: ./gradlew assembleDebug --console=plain
       - uses: actions/upload-artifact@v4
         with:
-          name: KorPlay-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: apk
+          path: |
+            app/build/outputs/apk/debug/app-debug.apk
+            tv/build/outputs/apk/debug/tv-debug.apk

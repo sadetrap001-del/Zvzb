@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kor Home</string>
+    <string name="free_memory">Belleği boşalt</string>
+    <string name="settings">Ayarlar</string>
+    <string name="show_hidden">Gizlenenleri göster (%1$d)</string>
+    <string name="hide_hidden">Gizlenenleri sakla</string>
+    <string name="loading">Uygulamalar yükleniyor…</string>
+    <string name="empty">Gösterilecek uygulama yok.</string>
+    <string name="hint">OK: aç  ·  OK\'a basılı tut: favori, gizle, uygulama bilgisi</string>
+    <string name="menu_favorite">Favorilere ekle</string>
+    <string name="menu_unfavorite">Favorilerden çıkar</string>
+    <string name="menu_hide">Listeden gizle</string>
+    <string name="menu_unhide">Gizlemeyi kaldır</string>
+    <string name="menu_info">Uygulama bilgisi (kaldır / devre dışı bırak)</string>
+    <string name="memory_freed">Arka plan uygulamaları kapatıldı · %1$d MB boşaldı</string>
+    <string name="memory_none">Arka plan uygulamaları kapatıldı · kapatılacak fazla bir şey yoktu</string>
+    <string name="err_launch">%1$s açılamadı</string>
+    <string name="err_settings">Ayarlar açılamadı</string>
+    <string name="star">★</string>
+</resources>
