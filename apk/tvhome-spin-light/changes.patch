@@ -1,0 +1,69 @@
+diff --git a/launcher/app/build.gradle b/launcher/app/build.gradle
+index 80a9d39..5419f8b 100644
+--- a/launcher/app/build.gradle
++++ b/launcher/app/build.gradle
+@@ -13,8 +13,8 @@ android {
+         applicationId providers.gradleProperty('launcherApplicationId').getOrElse('com.gathin.tvhome')
+         minSdk 26
+         targetSdk 34
+-        versionCode 14
+-        versionName '3.5'
++        versionCode 15
++        versionName '3.5-kor1'
+     }
+ 
+     buildTypes {
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/GlassView.java b/launcher/app/src/main/java/com/gathin/tvhome/GlassView.java
+index 0fd2b6c..3ba63bf 100644
+--- a/launcher/app/src/main/java/com/gathin/tvhome/GlassView.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/GlassView.java
+@@ -74,6 +74,10 @@ public class GlassView extends View {
+         invalidate();
+     }
+ 
++    float getRadius() {
++        return radius;
++    }
++
+     @Override
+     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+         super.onSizeChanged(w, h, oldw, oldh);
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+index eccf73f..1451c37 100644
+--- a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
++++ b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
+@@ -517,6 +517,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         sky.setIntensity(cfg.skyIntensity);
+         glass = findViewById(R.id.glass);
+         glass.setStyle(cfg.glassStyle);
++        if (getResources().getBoolean(R.bool.focus_spin_light) && cfg.animations && !cfg.reducedMotion) {
++            SpinRimView.attach(glass);
++        }
+         if (festive) glass.setAccent(festival.accentColor());
+         ambient = findViewById(R.id.ambient);
+         // The glow is one bitmap, so its alpha can be applied while drawing it. Otherwise every frame of
+diff --git a/launcher/app/src/main/res/values/config.xml b/launcher/app/src/main/res/values/config.xml
+index a32a106..6b33053 100644
+--- a/launcher/app/src/main/res/values/config.xml
++++ b/launcher/app/src/main/res/values/config.xml
+@@ -18,16 +18,18 @@
+ 
+     <!-- Apps pinned to the dock row at the bottom, in this order. Missing apps are skipped. -->
+     <string-array name="dock_apps">
++        <item>com.google.android.youtube.tv</item>
+         <item>com.netflix.ninja</item>
+         <item>com.amazon.amazonvideo.livingroom</item>
+-        <item>com.google.android.youtube.tv</item>
+-        <item>in.startv.hotstar</item>
+     </string-array>
+     <!-- With fewer dock_apps than columns (or a dock app that is not installed), the free dock slots take
+          the first grid apps, so the dock never shows a gap. false leaves them empty (#162); a theme can
+          set "fill_dock": false. -->
+     <bool name="fill_dock">true</bool>
+ 
++    <!-- A rotating rainbow light around the focused tile, on top of the glass highlight. false turns it off. -->
++    <bool name="focus_spin_light">true</bool>
++
+     <!-- Apps never shown as tiles (e.g. the Live TV app, which the Inputs menu already covers). -->
+     <string-array name="hidden_apps">
+         <item>com.mediatek.wwtv.tvcenter</item>
