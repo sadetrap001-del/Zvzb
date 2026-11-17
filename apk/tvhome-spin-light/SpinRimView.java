@@ -19,7 +19,7 @@ import android.widget.FrameLayout;
  */
 final class SpinRimView extends View {
 
-    private static final long PERIOD_MS = 3600;
+    private static final long PERIOD_MS = 2600;
     private static final int[] COLORS = {
         0xFFFF3B30, 0xFFFF9F0A, 0xFFFFD60A, 0xFF30D158, 0xFF64D2FF, 0xFF5E5CE6, 0xFFBF5AF2, 0xFFFF3B30,
     };
@@ -60,11 +60,11 @@ final class SpinRimView extends View {
             p.setStyle(Paint.Style.STROKE);
             p.setStrokeCap(Paint.Cap.ROUND);
         }
-        soft.setStrokeWidth(6f * density);
-        soft.setAlpha(55);
-        mid.setStrokeWidth(3f * density);
-        mid.setAlpha(130);
-        core.setStrokeWidth(1.8f * density);
+        soft.setStrokeWidth(12f * density);
+        soft.setAlpha(95);
+        mid.setStrokeWidth(6f * density);
+        mid.setAlpha(210);
+        core.setStrokeWidth(3f * density);
         core.setAlpha(255);
     }
 
