@@ -5,3 +5,8 @@ bu klasördeki değişiklik: seçili kutunun çevresinde dönen gökkuşağı ı
 `changes.patch` kaynak değişikliklerinin tamamıdır (dock sırası, config anahtarı, görünümün bağlanması).
 
 Kapatmak için `config.xml` içinde `focus_spin_light` değerini `false` yapıp yeniden derle.
+
+## Bluetooth düğmesi (3.5-kor3)
+
+Üst çubukta Girişler ve Wi-Fi düğmelerinin yanına bir Bluetooth düğmesi eklendi; TV'nin Bluetooth sayfasını açar.
+Kapatmak için `config.xml` içinde `show_bluetooth_button` değerini `false` yapıp yeniden derle.

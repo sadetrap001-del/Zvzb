@@ -1,5 +1,5 @@
 diff --git a/launcher/app/build.gradle b/launcher/app/build.gradle
-index 80a9d39..253bd69 100644
+index 80a9d39..25861c7 100644
 --- a/launcher/app/build.gradle
 +++ b/launcher/app/build.gradle
 @@ -13,8 +13,8 @@ android {
@@ -8,8 +8,8 @@ index 80a9d39..253bd69 100644
          targetSdk 34
 -        versionCode 14
 -        versionName '3.5'
-+        versionCode 16
-+        versionName '3.5-kor2'
++        versionCode 17
++        versionName '3.5-kor3'
      }
  
      buildTypes {
@@ -29,7 +29,7 @@ index 0fd2b6c..3ba63bf 100644
      protected void onSizeChanged(int w, int h, int oldw, int oldh) {
          super.onSizeChanged(w, h, oldw, oldh);
 diff --git a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
-index eccf73f..1451c37 100644
+index eccf73f..cd34639 100644
 --- a/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
 +++ b/launcher/app/src/main/java/com/gathin/tvhome/MainActivity.java
 @@ -517,6 +517,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
@@ -42,11 +42,177 @@ index eccf73f..1451c37 100644
          if (festive) glass.setAccent(festival.accentColor());
          ambient = findViewById(R.id.ambient);
          // The glow is one bitmap, so its alpha can be applied while drawing it. Otherwise every frame of
+@@ -851,6 +854,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         });
+         btnLibraryTop.setVisibility(cfg.libraryButton && cfg.appLibrary ? View.VISIBLE : View.GONE);
+         addTopBarApps(cfg.topBarApps, cfg.launchActions);
++        if (getResources().getBoolean(R.bool.show_bluetooth_button)) addBluetoothButton();
+         iconOnlyButtons = cfg.iconOnlyButtons;
+         topMenu = cfg.topMenu;
+         wifiIconOnly = iconOnlyButtons && cfg.wifiLabelWidth <= 0;
+@@ -2626,6 +2630,24 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
+         }
+     }
+ 
++    /** A round Bluetooth button in the top bar (show_bluetooth_button) that opens the TV's Bluetooth settings page. */
++    private void addBluetoothButton() {
++        ViewGroup bar = findViewById(R.id.topButtons);
++        TextView button = (TextView) getLayoutInflater().inflate(R.layout.top_app_button, bar, false);
++        button.setId(View.generateViewId());   // pillKeys finds the bar's ends by id
++        button.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_bluetooth, 0, 0, 0);
++        button.setContentDescription("Bluetooth");
++        button.setOnClickListener(v -> {
++            try {
++                startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
++            } catch (ActivityNotFoundException | SecurityException e) {
++                open(new Intent(Settings.ACTION_SETTINGS));   // no Bluetooth page on this TV: the general settings
++            }
++        });
++        bar.addView(button, bar.indexOfChild(getResources().getBoolean(R.bool.rtl_menu_bar) ? btnVpn : btnWifi));
++        topAppButtons.add(button);
++    }
++
+     @Override public void onLibraryUp() {
+         if (adapter.appCount() == 0) { firstTopButton().requestFocus(); return; }
+         int lastRow = ((adapter.appCount() - 1) / COLUMNS) * COLUMNS;
+diff --git a/launcher/app/src/main/java/com/gathin/tvhome/SpinRimView.java b/launcher/app/src/main/java/com/gathin/tvhome/SpinRimView.java
+new file mode 100644
+index 0000000..668d060
+--- /dev/null
++++ b/launcher/app/src/main/java/com/gathin/tvhome/SpinRimView.java
+@@ -0,0 +1,114 @@
++package com.gathin.tvhome;
++
++import android.content.Context;
++import android.graphics.Canvas;
++import android.graphics.Matrix;
++import android.graphics.Paint;
++import android.graphics.RectF;
++import android.graphics.SweepGradient;
++import android.os.SystemClock;
++import android.view.View;
++import android.view.ViewGroup;
++import android.view.ViewTreeObserver;
++import android.widget.FrameLayout;
++
++/**
++ * A rainbow light that circles the focused tile. It sits just above the {@link GlassView} and copies its position,
++ * size and fade on every frame, so the glass keeps its cached texture and only this one ring is redrawn. The
++ * angle comes from the clock, not from an Animator, so the speed does not change with the system animation scale.
++ */
++final class SpinRimView extends View {
++
++    private static final long PERIOD_MS = 2600;
++    private static final int[] COLORS = {
++        0xFFFF3B30, 0xFFFF9F0A, 0xFFFFD60A, 0xFF30D158, 0xFF64D2FF, 0xFF5E5CE6, 0xFFBF5AF2, 0xFFFF3B30,
++    };
++
++    private final GlassView glass;
++    private final float density;
++    private final Paint soft = new Paint(Paint.ANTI_ALIAS_FLAG);
++    private final Paint mid = new Paint(Paint.ANTI_ALIAS_FLAG);
++    private final Paint core = new Paint(Paint.ANTI_ALIAS_FLAG);
++    private final Matrix matrix = new Matrix();
++    private final RectF rect = new RectF();
++    private SweepGradient sweep;
++
++    /** Adds the ring right above the glass in the same parent. */
++    static void attach(final GlassView glass) {
++        final ViewGroup parent = (ViewGroup) glass.getParent();
++        final SpinRimView ring = new SpinRimView(glass.getContext(), glass);
++        int dp10 = Math.round(10f * glass.getResources().getDisplayMetrics().density);
++        parent.addView(ring, parent.indexOfChild(glass) + 1, new FrameLayout.LayoutParams(dp10, dp10));
++        parent.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
++            @Override
++            public boolean onPreDraw() {
++                ring.follow();
++                return true;
++            }
++        });
++    }
++
++    private SpinRimView(Context context, GlassView glass) {
++        super(context);
++        this.glass = glass;
++        density = getResources().getDisplayMetrics().density;
++        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
++        setFocusable(false);
++        setClickable(false);
++        setVisibility(INVISIBLE);
++        for (Paint p : new Paint[] {soft, mid, core}) {
++            p.setStyle(Paint.Style.STROKE);
++            p.setStrokeCap(Paint.Cap.ROUND);
++        }
++        soft.setStrokeWidth(12f * density);
++        soft.setAlpha(95);
++        mid.setStrokeWidth(6f * density);
++        mid.setAlpha(210);
++        core.setStrokeWidth(3f * density);
++        core.setAlpha(255);
++    }
++
++    /** Runs before each frame: match the glass, and keep the loop going while it is showing. */
++    private void follow() {
++        boolean show = glass.getAlpha() > 0.02f && glass.getVisibility() == VISIBLE
++                && glass.getWidth() > 0 && glass.getHeight() > 0;
++        if (!show) {
++            if (getVisibility() != INVISIBLE) setVisibility(INVISIBLE);
++            return;
++        }
++        ViewGroup.LayoutParams lp = getLayoutParams();
++        if (lp.width != glass.getWidth() || lp.height != glass.getHeight()) {
++            lp.width = glass.getWidth();
++            lp.height = glass.getHeight();
++            setLayoutParams(lp);
++        }
++        setTranslationX(glass.getX() - getLeft());
++        setTranslationY(glass.getY() - getTop());
++        setAlpha(glass.getAlpha());
++        if (getVisibility() != VISIBLE) setVisibility(VISIBLE);
++        invalidate();
++    }
++
++    @Override
++    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
++        super.onSizeChanged(w, h, oldw, oldh);
++        sweep = new SweepGradient(w / 2f, h / 2f, COLORS, null);
++        soft.setShader(sweep);
++        mid.setShader(sweep);
++        core.setShader(sweep);
++    }
++
++    @Override
++    protected void onDraw(Canvas canvas) {
++        if (sweep == null) return;
++        float angle = (SystemClock.uptimeMillis() % PERIOD_MS) * 360f / PERIOD_MS;
++        matrix.setRotate(angle, getWidth() / 2f, getHeight() / 2f);
++        sweep.setLocalMatrix(matrix);
++        float inset = 6f * density;   // the same inset GlassView leaves for its glow
++        rect.set(inset, inset, getWidth() - inset, getHeight() - inset);
++        float r = glass.getRadius();
++        canvas.drawRoundRect(rect, r, r, soft);
++        canvas.drawRoundRect(rect, r, r, mid);
++        canvas.drawRoundRect(rect, r, r, core);
++    }
++}
+diff --git a/launcher/app/src/main/res/drawable/ic_bluetooth.xml b/launcher/app/src/main/res/drawable/ic_bluetooth.xml
+new file mode 100644
+index 0000000..8f6aee0
+--- /dev/null
++++ b/launcher/app/src/main/res/drawable/ic_bluetooth.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="22dp" android:height="22dp"
++    android:viewportWidth="24" android:viewportHeight="24">
++    <path android:fillColor="#FFFFFFFF"
++        android:pathData="M17.71,7.71L12,2h-1v7.59L6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 11,14.41V22h1l5.71,-5.71 -4.3,-4.29 4.3,-4.29zM13,5.83l1.88,1.88L13,9.59V5.83zM14.88,16.29L13,18.17v-3.76l1.88,1.88z" />
++</vector>
 diff --git a/launcher/app/src/main/res/values/config.xml b/launcher/app/src/main/res/values/config.xml
-index a32a106..6b33053 100644
+index a32a106..fa06b5d 100644
 --- a/launcher/app/src/main/res/values/config.xml
 +++ b/launcher/app/src/main/res/values/config.xml
-@@ -18,16 +18,18 @@
+@@ -18,16 +18,21 @@
  
      <!-- Apps pinned to the dock row at the bottom, in this order. Missing apps are skipped. -->
      <string-array name="dock_apps">
@@ -63,6 +229,9 @@ index a32a106..6b33053 100644
  
 +    <!-- A rotating rainbow light around the focused tile, on top of the glass highlight. false turns it off. -->
 +    <bool name="focus_spin_light">true</bool>
++
++    <!-- A Bluetooth button in the top bar, next to Inputs and Wi-Fi, that opens the TV's Bluetooth / accessories page. -->
++    <bool name="show_bluetooth_button">true</bool>
 +
      <!-- Apps never shown as tiles (e.g. the Live TV app, which the Inputs menu already covers). -->
      <string-array name="hidden_apps">
