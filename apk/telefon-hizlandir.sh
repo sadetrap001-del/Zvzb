@@ -25,12 +25,12 @@ com.google.android.feedback
 "
 
 # Hedef Redmi'yi sec. Termux Redmi'nin kendisindeyse 127.0.0.1, baska bir telefondaysa Redmi'nin
-# Wi-Fi adresi (192.168.1.130). TV (192.168.1.113) hic secilmez. Elle secmek icin: TELEFON=ip:port sh ...
-REDMI_IP=${REDMI_IP:-192.168.1.130}
+# Wi-Fi adresi (UcuyoruzC5G: 192.168.1.186, TurkTelekom: 192.168.1.130). TV (192.168.1.113) hic secilmez. Elle secmek icin: TELEFON=ip:port sh ...
+REDMI_IP=${REDMI_IP:-192.168.1.186}
 DEVS=$(adb devices | tr -d '\r' | awk '$2=="device" {print $1}')
 SERIAL=$TELEFON
 [ -z "$SERIAL" ] && SERIAL=$(echo "$DEVS" | grep -E '^(127\.0\.0\.1|localhost):' | head -1)
-[ -z "$SERIAL" ] && SERIAL=$(echo "$DEVS" | grep "^$REDMI_IP:" | head -1)
+[ -z "$SERIAL" ] && SERIAL=$(echo "$DEVS" | grep -E "^($REDMI_IP|192\.168\.1\.130):" | head -1)
 # Redmi'nin adresi Wi-Fi agina gore degisebiliyor; bagli cihazlar arasinda Xiaomi olani ara.
 if [ -z "$SERIAL" ]; then
   for d in $(echo "$DEVS" | grep -v "^192\.168\.1\.113:"); do
