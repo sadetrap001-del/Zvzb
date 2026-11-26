@@ -8,5 +8,5 @@
 ## Telefon hızlandırma (Termux)
 
 `telefon-hizlandir.sh`: Redmi telefonu Termux'tan, Kablosuz hata ayıklama ile kendine bağlanarak hızlandırır.
-Animasyonları 0.5x yapar; MIUI reklam (msa), analiz ve Facebook servislerini kapatır (silmez); önbelleği temizler.
+Arayüze ve animasyonlara dokunmaz. MIUI reklam (msa), analiz ve Facebook servislerini kapatır (silmez); uygulamaları önceden derler, önbelleği temizler.
 `sh telefon-hizlandir.sh geri` hepsini eski haline getirir.

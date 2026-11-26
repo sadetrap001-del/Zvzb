@@ -1,5 +1,6 @@
 #!/bin/sh
-# Redmi telefonu (MIUI 12.5, Android 11) Termux'tan kendi kendine hizlandirir. Hicbir sey silinmez.
+# Redmi telefonu (MIUI 12.5, Android 11) Termux'tan kendi kendine hizlandirir ve reklamlari kapatir.
+# Hicbir sey silinmez, arayuz ve animasyonlar oldugu gibi kalir.
 # Telefon, Kablosuz hata ayiklama ile kendisine adb uzerinden baglanir.
 #
 # Bir kerelik hazirlik (Termux'ta):
@@ -34,21 +35,14 @@ fi
 A="adb -s $SERIAL"
 echo "Telefon: $($A shell getprop ro.product.model | tr -d '\r')  ($SERIAL)"
 
-anim() {
-  $A shell settings put global window_animation_scale "$1"
-  $A shell settings put global transition_animation_scale "$1"
-  $A shell settings put global animator_duration_scale "$1"
-  now=$($A shell settings get global window_animation_scale | tr -d '\r')
-  if [ "$now" != "$1" ]; then
-    echo "  UYARI: animasyonlar degismedi. 'USB hata ayiklama (Guvenlik ayarlari)' acik mi?"
-  fi
-}
-
 if [ "$1" = "geri" ]; then
   for p in $LIST; do
     echo "$p -> $($A shell pm enable --user 0 "$p" 2>&1 | tr -d '\r')"
   done
-  anim 1.0
+  # Betigin eski surumu animasyonlari 0.5x yapiyordu; onu da varsayilana dondur.
+  $A shell settings put global window_animation_scale 1.0
+  $A shell settings put global transition_animation_scale 1.0
+  $A shell settings put global animator_duration_scale 1.0
   echo "Hepsi eski haline dondu. Telefonu yeniden baslatman iyi olur."
   exit 0
 fi
@@ -66,8 +60,8 @@ for p in $LIST; do
   fi
 done
 
-echo "3/4 Animasyonlar hizlandiriliyor (0.5x)"
-anim 0.5
+echo "3/4 Uygulamalar onceden derleniyor, daha hizli acilacaklar (birkac dakika surebilir)"
+$A shell cmd package bg-dexopt-job 2>&1 | tr -d '\r' | tail -1
 
 echo "4/4 Onbellek temizleniyor, arka plan uygulamalari kapatiliyor"
 $A shell pm trim-caches 4096G >/dev/null 2>&1
