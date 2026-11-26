@@ -33,7 +33,7 @@ SERIAL=$TELEFON
 [ -z "$SERIAL" ] && SERIAL=$(echo "$DEVS" | grep "^$REDMI_IP:" | head -1)
 # Redmi'nin adresi Wi-Fi agina gore degisebiliyor; bagli cihazlar arasinda Xiaomi olani ara.
 if [ -z "$SERIAL" ]; then
-  for d in $DEVS; do
+  for d in $(echo "$DEVS" | grep -v "^192\.168\.1\.113:"); do
     case "$(adb -s "$d" shell getprop ro.product.brand | tr -d '\r' | tr 'A-Z' 'a-z')" in
       xiaomi|redmi|poco) SERIAL=$d; break ;;
     esac
