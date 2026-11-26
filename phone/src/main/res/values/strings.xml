@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kor Telefon</string>
+    <string name="search_hint">Uygulama ara</string>
+    <string name="no_results">“%1$s” bulunamadı</string>
+    <string name="loading">Uygulamalar yükleniyor…</string>
+    <string name="dock_hint">Bir uygulamaya basılı tut → “Alta sabitle”</string>
+    <string name="more">Diğer seçenekler</string>
+    <string name="clear">Aramayı temizle</string>
+    <string name="menu_pin">Alta sabitle</string>
+    <string name="menu_unpin">Alttan kaldır</string>
+    <string name="menu_hide">Listeden gizle</string>
+    <string name="menu_unhide">Gizlemeyi kaldır</string>
+    <string name="menu_info">Uygulama bilgisi</string>
+    <string name="menu_uninstall">Kaldır</string>
+    <string name="more_show_hidden">Gizlenenleri göster (%1$d)</string>
+    <string name="more_hide_hidden">Gizlenenleri sakla</string>
+    <string name="more_wallpaper">Duvar kağıdını değiştir</string>
+    <string name="more_default_home">Varsayılan ana ekranı seç</string>
+    <string name="more_settings">Telefon ayarları</string>
+    <string name="dock_full">Alt çubuk dolu (%1$d uygulama). Önce birini kaldır.</string>
+    <string name="hidden_toast">%1$s gizlendi. Aramada yine çıkar.</string>
+    <string name="err_launch">%1$s açılamadı</string>
+    <string name="err_open">Açılamadı</string>
+</resources>

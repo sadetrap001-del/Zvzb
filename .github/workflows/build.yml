@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -24,3 +26,15 @@ jobs:
           path: |
             app/build/outputs/apk/debug/app-debug.apk
             tv/build/outputs/apk/debug/tv-debug.apk
+            phone/build/outputs/apk/debug/phone-debug.apk
+      # Telefon ana ekranı, telefondan doğrudan indirilebilsin diye sabit bir sürüm sayfasına konur.
+      - name: Kor Telefon APK'sını yayınla
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ./gradlew :phone:assembleRelease --console=plain
+          cp phone/build/outputs/apk/release/phone-release.apk KorTelefon.apk
+          gh release delete kor-telefon --yes --cleanup-tag || true
+          gh release create kor-telefon KorTelefon.apk --prerelease --target "$GITHUB_SHA" \
+            --title "Kor Telefon" --notes "Telefon ana ekranı. Dal: $GITHUB_REF_NAME, sürüm: ${GITHUB_SHA:0:7}"

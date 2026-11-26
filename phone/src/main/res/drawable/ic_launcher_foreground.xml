@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Telefon biçiminde dört kutulu simge -->
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.35"
+        android:pathData="M40,28h28a6,6 0,0 1,6 6v40a6,6 0,0 1,-6 6h-28a6,6 0,0 1,-6 -6v-40a6,6 0,0 1,6 -6z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M41,38h11v11h-11z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M56,38h11v11h-11z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M41,53h11v11h-11z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.55" android:pathData="M56,53h11v11h-11z" />
+</vector>

@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 rootProject.name = "KorPlay"
 include(":app")
 include(":tv")
+include(":phone")

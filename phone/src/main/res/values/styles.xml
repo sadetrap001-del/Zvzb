@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="text">#F4F5F8</color>
+    <color name="muted">#B3B8C4</color>
+    <color name="accent">#FF5A36</color>
+    <color name="glass">#33FFFFFF</color>
+    <color name="glass_line">#26FFFFFF</color>
+
+    <!-- Arkada telefonun kendi duvar kağıdı görünür; sistem çubukları saydamdır. -->
+    <style name="HomeTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/muted</item>
+        <item name="android:textColorHint">@color/muted</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+    <style name="Label">
+        <item name="android:textColor">@color/text</item>
+        <item name="android:shadowColor">#99000000</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">4</item>
+    </style>
+</resources>
