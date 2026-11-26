@@ -1,7 +1,7 @@
 #!/bin/sh
 # Redmi telefonu (MIUI 12.5, Android 11) Termux'tan kendi kendine hizlandirir ve reklamlari kapatir.
 # Hicbir sey silinmez, arayuz ve animasyonlar oldugu gibi kalir.
-# Telefon, Kablosuz hata ayiklama ile kendisine adb uzerinden baglanir.
+# Termux Redmi'nin kendisinde ya da ayni Wi-Fi'daki baska bir telefonda calisabilir.
 #
 # Bir kerelik hazirlik (Termux'ta):
 #   pkg install android-tools
@@ -24,16 +24,28 @@ com.facebook.system
 com.google.android.feedback
 "
 
-# Ayni anda TV de bagli olabilir; yalnizca telefonun kendisini sec.
-SERIAL=$(adb devices | tr -d '\r' | awk '$2=="device" && ($1 ~ /^127\.0\.0\.1:/ || $1 ~ /^localhost:/) {print $1; exit}')
+# Hedef Redmi'yi sec. Termux Redmi'nin kendisindeyse 127.0.0.1, baska bir telefondaysa Redmi'nin
+# Wi-Fi adresi (192.168.1.130). TV (192.168.1.113) hic secilmez. Elle secmek icin: TELEFON=ip:port sh ...
+REDMI_IP=${REDMI_IP:-192.168.1.130}
+DEVS=$(adb devices | tr -d '\r' | awk '$2=="device" {print $1}')
+SERIAL=$TELEFON
+[ -z "$SERIAL" ] && SERIAL=$(echo "$DEVS" | grep -E '^(127\.0\.0\.1|localhost):' | head -1)
+[ -z "$SERIAL" ] && SERIAL=$(echo "$DEVS" | grep "^$REDMI_IP:" | head -1)
 if [ -z "$SERIAL" ]; then
-  echo "Telefon kendisine bagli degil."
-  echo "Kablosuz hata ayiklama ekranindaki portla:  adb connect 127.0.0.1:<port>"
-  echo "Ilk kezse once eslestir:  adb pair 127.0.0.1:<eslestirme portu> <kod>"
+  echo "Redmi bagli degil. Redmi'de Kablosuz hata ayiklama ekranindaki portla:"
+  echo "  Termux Redmi'deyse:          adb connect 127.0.0.1:<port>"
+  echo "  Termux baska telefondaysa:   adb connect $REDMI_IP:<port>"
+  echo "Ilk kezse once eslestir:  adb pair <ayni adres>:<eslestirme portu> <kod>"
   exit 1
 fi
 A="adb -s $SERIAL"
-echo "Telefon: $($A shell getprop ro.product.model | tr -d '\r')  ($SERIAL)"
+BRAND=$($A shell getprop ro.product.brand | tr -d '\r')
+case "$(echo "$BRAND" | tr 'A-Z' 'a-z')" in
+  xiaomi|redmi|poco) ;;
+  *) echo "Bagli cihaz Redmi degil ($BRAND, $SERIAL). Bu betik yalnizca Redmi/Xiaomi icindir, durduruldu."
+     exit 1 ;;
+esac
+echo "Telefon: $BRAND $($A shell getprop ro.product.model | tr -d '\r')  ($SERIAL)"
 
 if [ "$1" = "geri" ]; then
   for p in $LIST; do
