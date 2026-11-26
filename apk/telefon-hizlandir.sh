@@ -31,6 +31,14 @@ DEVS=$(adb devices | tr -d '\r' | awk '$2=="device" {print $1}')
 SERIAL=$TELEFON
 [ -z "$SERIAL" ] && SERIAL=$(echo "$DEVS" | grep -E '^(127\.0\.0\.1|localhost):' | head -1)
 [ -z "$SERIAL" ] && SERIAL=$(echo "$DEVS" | grep "^$REDMI_IP:" | head -1)
+# Redmi'nin adresi Wi-Fi agina gore degisebiliyor; bagli cihazlar arasinda Xiaomi olani ara.
+if [ -z "$SERIAL" ]; then
+  for d in $DEVS; do
+    case "$(adb -s "$d" shell getprop ro.product.brand | tr -d '\r' | tr 'A-Z' 'a-z')" in
+      xiaomi|redmi|poco) SERIAL=$d; break ;;
+    esac
+  done
+fi
 if [ -z "$SERIAL" ]; then
   echo "Redmi bagli degil. Redmi'de Kablosuz hata ayiklama ekranindaki portla:"
   echo "  Termux Redmi'deyse:          adb connect 127.0.0.1:<port>"
