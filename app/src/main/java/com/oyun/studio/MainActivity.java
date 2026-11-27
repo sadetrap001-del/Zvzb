@@ -284,12 +284,13 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
         launchedAt = SystemClock.elapsedRealtime();
 
         boolean started = false;
-        if (prefs.getBoolean("external", false) && d != null && d.isValid()) {
+        if (prefs.getBoolean("tvOnly", true) && d != null && d.isValid()) {
             try {
                 ActivityOptions o = ActivityOptions.makeBasic();
                 o.setLaunchDisplayId(d.getDisplayId());
                 startActivity(i, o.toBundle());
                 started = true;
+                Toast.makeText(this, "TV'de açıldı. TV'de mouse veya gamepad ile kontrol et.", Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 Toast.makeText(this, "Harici ekranda açılamadı, ayna modunda açılıyor", Toast.LENGTH_LONG).show();
             }
@@ -402,12 +403,12 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
         col.addView(onlyGamesSwitch);
 
         Switch ext = new Switch(this);
-        ext.setText("Oyunu harici ekranda aç (masaüstü modu)\nKapalıysa oyun telefonda açılır ve ekrana aynalanır");
+        ext.setText("Oyunu sadece TV'de aç (tam ekran)\nKapalıysa oyun telefonda açılır ve TV'ye aynalanır (kenarlarda siyah boşluk kalır)");
         ext.setTextColor(Color.WHITE);
         ext.setTextSize(14);
-        ext.setChecked(prefs.getBoolean("external", false));
+        ext.setChecked(prefs.getBoolean("tvOnly", true));
         ext.setPadding(0, dp(10), 0, dp(18));
-        ext.setOnCheckedChangeListener((c, v) -> prefs.edit().putBoolean("external", v).apply());
+        ext.setOnCheckedChangeListener((c, v) -> prefs.edit().putBoolean("tvOnly", v).apply());
         col.addView(ext);
 
         Switch k4 = new Switch(this);
