@@ -284,13 +284,14 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
         launchedAt = SystemClock.elapsedRealtime();
 
         boolean started = false;
+        boolean onTv = false;
         if (prefs.getBoolean("tvOnly", true) && d != null && d.isValid()) {
             try {
                 ActivityOptions o = ActivityOptions.makeBasic();
                 o.setLaunchDisplayId(d.getDisplayId());
                 startActivity(i, o.toBundle());
                 started = true;
-                Toast.makeText(this, "TV'de açıldı. TV'de mouse veya gamepad ile kontrol et.", Toast.LENGTH_LONG).show();
+                onTv = true;
             } catch (Exception e) {
                 Toast.makeText(this, "Harici ekranda açılamadı, ayna modunda açılıyor", Toast.LENGTH_LONG).show();
             }
@@ -307,13 +308,23 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
         }
         // Oyun açıldıktan sonra Oyun Studio kendini tamamen kapatır ve bellekten çıkar.
         // Böylece oyun/emülatör, ana ekrandan açılmış gibi hiçbir müdahale olmadan çalışır.
-        if (started) {
+        if (started && onTv) {
+            // Oyun TV'de: telefon touchpad olsun (TV'de imleç)
+            ui.postDelayed(() -> {
+                dismissStudio();
+                startActivity(new Intent(this, TouchpadActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                finishAndRemoveTask();
+            }, 700);
+        } else if (started) {
+            // Ayna modu: Oyun Studio kendini tamamen kapatsın, oyuna karışmasın
             ui.postDelayed(() -> {
                 dismissStudio();
                 finishAndRemoveTask();
                 ui.postDelayed(() -> android.os.Process.killProcess(android.os.Process.myPid()), 700);
             }, 700);
         }
+    }
     }
 
     // ------------------------------------------------------------------ gamepad yönlendirme
