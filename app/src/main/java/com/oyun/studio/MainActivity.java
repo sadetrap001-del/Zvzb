@@ -102,8 +102,14 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
     @Override
     protected void onRestart() {
         super.onRestart();
-        // Oyundan geri dönüldü: Studio tekrar açılsın
-        hiddenForGame = false;
+        if (launchedAt != 0 && SystemClock.elapsedRealtime() - launchedAt < 15000) {
+            // Oyun açıldıktan hemen sonra geri dönüldü: oyun kapanmış/çökmüş olabilir
+            Toast.makeText(this, "Oyun hemen kapandı. Studio açılmadı; tekrar denemek için \"Studio'yu göster\"e bas.", Toast.LENGTH_LONG).show();
+            hiddenForGame = true;
+        } else {
+            // Oyundan geri dönüldü: Studio tekrar açılsın
+            hiddenForGame = false;
+        }
     }
 
     @Override
@@ -254,35 +260,54 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
         if (screen != null) screen.reload();
     }
 
+    long launchedAt;
+
     void launchApp(AppItem a) {
         prefs.edit().putLong("last_" + a.pkg, System.currentTimeMillis()).apply();
-        Intent i = new Intent(Intent.ACTION_MAIN)
-                .addCategory(Intent.CATEGORY_LAUNCHER)
-                .setComponent(a.cn)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-
-        Display d = screen != null ? screen.getDisplay() : presentationDisplay();
+        final Display d = screen != null ? screen.getDisplay() : presentationDisplay();
+        final boolean modeWasForced = screen != null && prefs.getBoolean("force4k", true);
         hiddenForGame = true;
         dismissStudio();
+        Toast.makeText(this, a.label + " açılıyor…", Toast.LENGTH_SHORT).show();
+        // Studio kapanınca harici ekran çözünürlüğü eski haline dönüyor.
+        // Bu geçiş bitmeden oyunu açmayalım (emülatörler çözünürlük değişiminde çökebiliyor).
+        ui.postDelayed(() -> startGame(a, d), modeWasForced ? 2000 : 300);
+    }
 
-        // Masaüstü modu: oyunu doğrudan harici ekranda aç (telefon serbest kalır)
-        if (prefs.getBoolean("external", false) && d != null) {
+    void startGame(AppItem a, Display d) {
+        // Telefonun ana ekranının kullandığı başlatma isteğinin aynısı
+        Intent i = getPackageManager().getLaunchIntentForPackage(a.pkg);
+        if (i == null) {
+            i = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(a.cn);
+        }
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        launchedAt = SystemClock.elapsedRealtime();
+
+        boolean started = false;
+        if (prefs.getBoolean("external", false) && d != null && d.isValid()) {
             try {
                 ActivityOptions o = ActivityOptions.makeBasic();
                 o.setLaunchDisplayId(d.getDisplayId());
-                startActivity(new Intent(i).addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK), o.toBundle());
-                return;
+                startActivity(i, o.toBundle());
+                started = true;
             } catch (Exception e) {
                 Toast.makeText(this, "Harici ekranda açılamadı, ayna modunda açılıyor", Toast.LENGTH_LONG).show();
             }
         }
-        // Ayna modu: oyun telefonda açılır, HDMI aynalaması ile ekranda görünür
-        try {
-            startActivity(i);
-        } catch (Exception e) {
-            hiddenForGame = false;
-            showStudio();
-            Toast.makeText(this, "Uygulama açılamadı", Toast.LENGTH_SHORT).show();
+        if (!started) {
+            try {
+                startActivity(i);
+                started = true;
+            } catch (Exception e) {
+                hiddenForGame = false;
+                showStudio();
+                Toast.makeText(this, "Uygulama açılamadı", Toast.LENGTH_SHORT).show();
+            }
+        }
+        // Oyun Studio'yu oyunun arkasından çek: oyun kendi içinde başka ekran/uygulama açarsa
+        // ya da kapanırsa Oyun Studio araya girmesin.
+        if (started && !prefs.getBoolean("external", false)) {
+            ui.postDelayed(() -> moveTaskToBack(true), 800);
         }
     }
 
@@ -381,6 +406,18 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
         ext.setOnCheckedChangeListener((c, v) -> prefs.edit().putBoolean("external", v).apply());
         col.addView(ext);
 
+        Switch k4 = new Switch(this);
+        k4.setText("Harici ekranı en yüksek çözünürlüğe (4K) zorla");
+        k4.setTextColor(Color.WHITE);
+        k4.setTextSize(14);
+        k4.setChecked(prefs.getBoolean("force4k", true));
+        k4.setPadding(0, 0, 0, dp(18));
+        k4.setOnCheckedChangeListener((c, v) -> {
+            prefs.edit().putBoolean("force4k", v).apply();
+            if (screen != null) { dismissStudio(); showStudio(); }
+        });
+        col.addView(k4);
+
         TextView rem = text("KUMANDA", 13, 0xFF888888, true);
         rem.setLetterSpacing(0.2f);
         rem.setPadding(0, dp(8), 0, dp(10));
@@ -478,7 +515,7 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
         protected void onCreate(Bundle b) {
             super.onCreate(b);
             setCancelable(false);
-            pickBestMode();
+            if (host.prefs.getBoolean("force4k", true)) pickBestMode();
 
             root = new FrameLayout(getContext());
             GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
