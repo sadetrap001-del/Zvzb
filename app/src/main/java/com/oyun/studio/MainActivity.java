@@ -325,7 +325,6 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
             }, 700);
         }
     }
-    }
 
     // ------------------------------------------------------------------ gamepad yönlendirme
 
