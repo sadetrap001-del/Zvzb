@@ -304,11 +304,16 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
                 Toast.makeText(this, "Uygulama açılamadı", Toast.LENGTH_SHORT).show();
             }
         }
-        // Oyun Studio'yu oyunun arkasından çek: oyun kendi içinde başka ekran/uygulama açarsa
-        // ya da kapanırsa Oyun Studio araya girmesin.
-        if (started && !prefs.getBoolean("external", false)) {
-            ui.postDelayed(() -> moveTaskToBack(true), 800);
+        // Oyun açıldıktan sonra Oyun Studio kendini tamamen kapatır ve bellekten çıkar.
+        // Böylece oyun/emülatör, ana ekrandan açılmış gibi hiçbir müdahale olmadan çalışır.
+        if (started) {
+            ui.postDelayed(() -> {
+                dismissStudio();
+                finishAndRemoveTask();
+                ui.postDelayed(() -> android.os.Process.killProcess(android.os.Process.myPid()), 700);
+            }, 700);
         }
+    }
     }
 
     // ------------------------------------------------------------------ gamepad yönlendirme
@@ -434,7 +439,7 @@ public class MainActivity extends Activity implements DisplayManager.DisplayList
 
         TextView hint = text("Gamepad bağlıysa direkt onunla gezebilirsin:\n"
                 + "Yön tuşları / sol analog = gez,  A = aç,  Y = oyunlar ↔ tümü,  START = Studio'ya dön.\n\n"
-                + "Oyundan çıkıp bu uygulamaya döndüğünde Studio tekrar açılır.", 13, 0xFF9A9AA5, false);
+                + "Oyun açılınca Oyun Studio kendini kapatır (oyuna karışmasın diye). Oyundan sonra Studio için uygulamayı tekrar aç.", 13, 0xFF9A9AA5, false);
         hint.setPadding(0, dp(20), 0, 0);
         col.addView(hint);
 
